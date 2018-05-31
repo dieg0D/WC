@@ -8,7 +8,7 @@ import kotlin.concurrent.thread
 var word_space : Queue<String> =ArrayDeque<String>()
 var freq_space : Queue<HashMap<String,Int>> = ArrayDeque<HashMap<String,Int>>()
 var stopwords : Set<String> = File("/home/diego/Documentos/tp2/WC/src/main/resources/stop_words.txt").readLines().toString().split(",").toSet()
-
+var t : Queue<HashMap<Thread,HashMap<String,Int>>> = ArrayDeque<HashMap<Thread,HashMap<String,Int>>>()
 
 fun process_words(){
     val word_freqs = hashMapOf<String,Int>()
@@ -30,10 +30,14 @@ fun process_words(){
             }
         }
     }
+    t.add(hashMapOf(Thread.currentThread()to word_freqs))
     freq_space.add(word_freqs)
 }
 
 fun main(args : Array<String>){
+
+    var a = System.currentTimeMillis()
+    println(a)
     val argv = File("/home/diego/Documentos/pride-and-prejudice.txt").readLines().toString().toLowerCase()
     val re = Regex("""[a-z]{2,}""").findAll(argv)
     for(word in re){
@@ -42,7 +46,9 @@ fun main(args : Array<String>){
     val workers = Array(5,{ thread { process_words() }})
 
     workers.forEach { it.join() }
-
+    for(tt in t){
+        println("thread ${tt.keys} - ${tt.values} ")
+    }
     val word_freqs = hashMapOf<String,Int>()
     var count : Int
     while (freq_space.isNotEmpty()){
@@ -67,4 +73,6 @@ fun main(args : Array<String>){
         }
         c++
     }
+
+    println(System.currentTimeMillis()- a)
 }
